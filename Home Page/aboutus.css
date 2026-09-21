@@ -1,0 +1,279 @@
+.navbar {
+  height: 96px;
+  width: 100%;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 38px;
+  position: fixed;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 38px;
+}
+
+.explore-btn {
+  color: white;
+  background: transparent;
+  border: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.explore-btn span {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  border: 1px solid #aaa;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+}
+
+.search-box {
+  width: 242px;
+  height: 38px;
+  border: 1px solid #697078;
+}
+
+.search-box input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: white;
+  border: 0;
+  outline: 0;
+  padding: 0 12px;
+  font-size: 16px;
+}
+
+.search-box input::placeholder {
+  color: #9ba0a6;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.logo::before {
+  content: "✦";
+  color: #e63e36;
+  margin-right: 7px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.nav-links span {
+  color: #ddd;
+  margin-left: 5px;
+}
+
+.game {
+  color: #ff3b30;
+  border: 1px solid #ff3b30;
+  padding: 2px 5px;
+  font-size: 11px;
+  margin-left: 5px;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #050816;
+    color: white;
+    min-height: 100vh;
+}
+
+/* ABOUT SECTION */
+
+.about {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 100px 9%;
+    gap: 80px;
+}
+
+/* TEXT */
+
+.about-text {
+    width: 50%;
+    animation: slideLeft 1s ease;
+}
+
+.small-title {
+    color: #7c9cff;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.about-text h1 {
+    font-size: 65px;
+    margin: 18px 0 25px;
+    line-height: 1.1;
+}
+
+.about-text h1 span {
+    color: #7c9cff;
+}
+
+.about-text p {
+    color: #c5c8d4;
+    font-size: 17px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    max-width: 650px;
+}
+
+/* BUTTON */
+
+.about-text button {
+    margin-top: 20px;
+    padding: 15px 28px;
+    border: none;
+    border-radius: 30px;
+    background: #7c9cff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.about-text button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(124, 156, 255, 0.4);
+}
+
+/* IMAGE */
+
+.about-image {
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    animation: slideRight 1s ease;
+}
+
+.about-image img {
+    width: 430px;
+    height: 430px;
+    object-fit: cover;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 60px rgba(124, 156, 255, 0.35);
+    animation: floating 4s ease-in-out infinite;
+}
+
+/* GLOW */
+
+.planet-glow {
+    position: absolute;
+    width: 470px;
+    height: 470px;
+    border-radius: 50%;
+    background: rgba(124, 156, 255, 0.12);
+    filter: blur(35px);
+}
+
+/* ANIMATIONS */
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-60px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(60px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* PHONE */
+
+@media (max-width: 900px) {
+
+    .about {
+        flex-direction: column;
+        text-align: center;
+        padding: 80px 5%;
+    }
+
+    .about-text,
+    .about-image {
+        width: 100%;
+    }
+
+    .about-text h1 {
+        font-size: 45px;
+    }
+
+    .about-image img {
+        width: 320px;
+        height: 320px;
+    }
+
+    .planet-glow {
+        width: 350px;
+        height: 350px;
+    }
+}

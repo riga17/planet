@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Exploration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="explore-btn" id="exploreBtn">Home <span>⌄</span></button>
+    </div>
+
+    <a class="logo" href="#">SPACE</a>
+
+    <nav class="nav-links">
+      <a href="aboutus.html">About Us <span></span></a>
+      <a href="planets.html">Planets<span></span></a>
+      <a href="game.html" class="game">Game</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="stars"></div>
+      <div class="hero-glow"></div>
+
+      <div class="hero-content">
+        <p class="eyebrow">SPACE EXPLORATION</p>
+        <h1>EXPLORE<br>THE WORLD<br>OF PLANETS</h1>
+        <p class="intro">
+          Discover life and science beyond Earth. Explore missions,
+          experiments and the technology helping humans reach farther into space.
+        </p>
+        <a href="planets.html">
+        <button class="primary-btn" id="missionBtn">PLANETS</button>
+        </a>
+      </div>
+
+      <div class="astronaut">
+        <div class="helmet">
+          <div class="visor"></div>
+          <div class="helmet-light"></div>
+        </div>
+        <div class="suit">
+          <div class="badge">O</div>
+          <div class="control-panel">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="arm left-arm"></div>
+        <div class="arm right-arm"></div>
+      </div>
+
+      <div class="bottom-info" id="missions">
+        <article>
+          <span class="label">CURRENT MISSION</span>
+          <h3>Expedition 75 <button class="arrow">→</button></h3>
+        </article>
+
+        <article>
+          <span class="label">FUTURE MISSION</span>
+          <h3>Next Generation Crew <button class="arrow">→</button></h3>
+        </article>
+
+        <article>
+          <span class="label">FOR THE BENEFIT OF ALL</span>
+          <h3>Humans in Space <button class="arrow">→</button></h3>
+        </article>
+      </div>
+
+      <button class="pause-btn" id="pauseBtn" aria-label="Pause stars">Ⅱ</button>
+    </section>
+
+    <section class="content-section" id="gallery">
+      <p class="eyebrow">DISCOVER MORE</p>
+      <h2>Explore Beyond Earth</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">◉</div>
+          <h3>Space Science</h3>
+          <p>Learn how experiments in orbit help us understand our planet and the universe.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">✦</div>
+          <h3>Future Missions</h3>
+          <p>Follow new technology and missions designed to take humans farther than ever.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⌁</div>
+          <h3>Life in Orbit</h3>
+          <p>See what everyday life, research and teamwork look like aboard a space station.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="live-section" id="live">
+      <div>
+        <p class="eyebrow">SPACE</p>
+        <h2>Learn more about space.</h2>
+      </div>
+      <button class="primary-btn" id="liveBtn">PLANETS</button>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

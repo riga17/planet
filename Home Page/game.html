@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Space Missions</title>
+
+  <link rel="stylesheet" href="game.css">
+</head>
+
+<body>
+
+  <div class="space-background">
+    <div class="nebula nebula-one"></div>
+    <div class="nebula nebula-two"></div>
+    <div class="stars-layer stars-one"></div>
+    <div class="stars-layer stars-two"></div>
+  </div>
+
+
+  <header class="game-header">
+
+    <div class="brand">
+
+      <span class="brand-mark">S</span>
+
+      <div>
+        <strong>SPACE</strong>
+        <small>MISSION CONTROL</small>
+      </div>
+
+    </div>
+
+
+    <nav>
+
+      <a href="index.html">Home</a>
+
+      <a href="planets.html">Planets</a>
+
+      <a class="active" href="game.html">Games</a>
+
+    </nav>
+
+  </header>
+
+
+  <main>
+
+    <section class="intro">
+
+      <p class="section-label">
+        SPACE TRAINING / MISSION CONTROL
+      </p>
+
+      <h1>Space Missions</h1>
+
+      <p>
+        Pilot your spacecraft, explore the planets,
+        and test your Solar System knowledge.
+      </p>
+
+    </section>
+
+
+    <!-- GAME SELECTOR -->
+
+    <section class="mission-selector">
+
+      <button
+        class="mission-card active"
+        data-game="rocket">
+
+        <span class="mission-number">
+          01
+        </span>
+
+        <div>
+
+          <h2>Planet Run</h2>
+
+          <p>
+            Pilot your rocket through space,
+            collect planets and survive as long as possible.
+          </p>
+
+        </div>
+
+        <span class="mission-arrow">
+          →
+        </span>
+
+      </button>
+
+
+      <button
+        class="mission-card"
+        data-game="quiz">
+
+        <span class="mission-number">
+          02
+        </span>
+
+        <div>
+
+          <h2>Mission Quiz</h2>
+
+          <p>
+            How much do you actually know
+            about our Solar System?
+          </p>
+
+        </div>
+
+        <span class="mission-arrow">
+          →
+        </span>
+
+      </button>
+
+    </section>
+
+
+
+    <!-- =====================================
+         PLANET RUN GAME
+    ====================================== -->
+
+    <section
+      class="game-panel active-panel"
+      id="rocket">
+
+
+      <div class="panel-top">
+
+        <div>
+
+          <span class="section-label">
+            MISSION 01
+          </span>
+
+          <h2>
+            Planet Run
+          </h2>
+
+        </div>
+
+
+        <div class="game-controls">
+
+          <div class="score-display">
+
+            <span>SCORE</span>
+
+            <strong id="rocketScore">
+              0
+            </strong>
+
+          </div>
+
+
+          <button
+            class="reset-button"
+            id="rocketReset">
+
+            New Mission
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="rocket-game-layout">
+
+
+        <div class="rocket-game">
+
+
+          <canvas
+            id="rocketCanvas"
+            width="720"
+            height="600">
+          </canvas>
+
+
+          <div
+            class="rocket-message"
+            id="rocketMessage">
+
+            <div class="launch-symbol">
+              🚀
+            </div>
+
+            <h3>
+              PLANET RUN
+            </h3>
+
+            <p>
+              Use the arrow keys or WASD.
+              Collect planets and avoid space debris.
+            </p>
+
+            <button id="rocketStart">
+              Launch Mission
+            </button>
+
+          </div>
+
+
+        </div>
+
+
+
+        <aside class="instrument-panel">
+
+
+          <div class="instrument">
+
+            <span>
+              SCORE
+            </span>
+
+            <strong id="sideScore">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="instrument">
+
+            <span>
+              PLANETS COLLECTED
+            </span>
+
+            <strong id="planetCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="instrument">
+
+            <span>
+              DISTANCE
+            </span>
+
+            <strong id="rocketDistance">
+              0 km
+            </strong>
+
+          </div>
+
+
+          <div class="instrument">
+
+            <span>
+              MISSION STATUS
+            </span>
+
+            <strong id="rocketStatus">
+              STANDBY
+            </strong>
+
+          </div>
+
+
+          <div class="controls-info">
+
+            <span>
+              CONTROLS
+            </span>
+
+            <p>
+              ↑ ↓ ← → &nbsp; or &nbsp; W A S D
+            </p>
+
+          </div>
+
+        </aside>
+
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================
+         SOLAR SYSTEM QUIZ
+    ====================================== -->
+
+    <section
+      class="game-panel"
+      id="quiz">
+
+
+      <div class="panel-top">
+
+        <div>
+
+          <span class="section-label">
+            MISSION 02
+          </span>
+
+          <h2>
+            Solar System Quiz
+          </h2>
+
+        </div>
+
+
+        <div class="quiz-score">
+
+          SCORE:
+
+          <strong id="quizScore">
+            0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="quiz-container">
+
+
+        <div
+          class="question-count"
+          id="questionCount">
+
+          QUESTION 1 / 10
+
+        </div>
+
+
+        <h3 id="question">
+          Loading question...
+        </h3>
+
+
+        <div
+          class="answers"
+          id="answers">
+        </div>
+
+
+        <div class="quiz-bottom">
+
+          <span id="quizFeedback">
+            Select an answer.
+          </span>
+
+
+          <button
+            id="nextQuestion"
+            disabled>
+
+            Next Question
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+
+    <span>
+      SPACE MISSION CONTROL
+    </span>
+
+    <span>
+      SOLAR SYSTEM TRAINING
+    </span>
+
+  </footer>
+
+
+  <script src="game.js"></script>
+
+</body>
+</html>

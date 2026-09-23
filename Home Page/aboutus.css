@@ -71,7 +71,7 @@
 }
 
 .logo::before {
-  content: "✦";
+  content: "";
   color: #e63e36;
   margin-right: 7px;
 }

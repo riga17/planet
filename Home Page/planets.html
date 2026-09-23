@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Solar System — Mini Project</title>
+  <link rel="stylesheet" href="planets.css">
+</head>
+<body>
+  <div class="stars"></div>
+
+
+  
+  <header class="navbar">
+    <div class="nav-left">
+      <a href="planets.html">
+      <button class="explore-btn" id="exploreBtn">Home <span>⌄</span></button>
+      </a>
+    </div>
+
+    <a class="logo" href="#">SPACE</a>
+
+    <nav class="nav-links">
+      <a href="aboutus.html">About Us <span></span></a>
+      <a href="planets.html">Planets<span></span></a>
+      <a href="game.html" class="game">Game</a>
+    </nav>
+  </header>
+
+
+
+  <header class="hero">
+    <p class="eyebrow"></p><br>
+    <h1>The Solar System</h1>
+    <p class="subtitle">Click a planet to discover its history, features, and secrets.</p>
+    <div class="hint">Click the planets • Watch the orbits • Explore space</div>
+  </header>
+
+  <main>
+    <section class="space" aria-label="Solar System Model">
+      <div class="sun" id="sun" tabindex="0" title="Click the Sun">
+        <span></span>
+        <b>The Sun</b>
+      </div>
+
+      <div class="orbit orbit-1"><button class="planet mercury" data-planet="mercury" aria-label="Mercury"></button></div>
+      <div class="orbit orbit-2"><button class="planet venus" data-planet="venus" aria-label="Venus"></button></div>
+      <div class="orbit orbit-3"><button class="planet earth" data-planet="earth" aria-label="Earth"></button></div>
+      <div class="orbit orbit-4"><button class="planet mars" data-planet="mars" aria-label="Mars"></button></div>
+      <div class="orbit orbit-5"><button class="planet jupiter" data-planet="jupiter" aria-label="Jupiter"></button></div>
+      <div class="orbit orbit-6"><button class="planet saturn" data-planet="saturn" aria-label="Saturn"><i></i></button></div>
+      <div class="orbit orbit-7"><button class="planet uranus" data-planet="uranus" aria-label="Uranus"></button></div>
+      <div class="orbit orbit-8"><button class="planet neptune" data-planet="neptune" aria-label="Neptune"></button></div>
+
+      <div class="orbit-label label-1">Mercury</div>
+      <div class="orbit-label label-2">Venus</div>
+      <div class="orbit-label label-3">Earth</div>
+      <div class="orbit-label label-4">Mars</div>
+      <div class="orbit-label label-5">Jupiter</div>
+      <div class="orbit-label label-6">Saturn</div>
+      <div class="orbit-label label-7">Uranus</div>
+      <div class="orbit-label label-8">Neptune</div>
+    </section>
+
+    <section class="legend">
+      <h2>Explore the 8 planets</h2>
+      <p>Choose a planet below or click directly on it in space.</p>
+      <div class="planet-list">
+        <button data-planet="mercury">Mercury</button>
+        <button data-planet="venus">Venus</button>
+        <button data-planet="earth">Earth</button>
+        <button data-planet="mars">Mars</button>
+        <button data-planet="jupiter">Jupiter</button>
+        <button data-planet="saturn">Saturn</button>
+        <button data-planet="uranus">Uranus</button>
+        <button data-planet="neptune">Neptune</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="planetModal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" id="closeModal" aria-label="Close">×</button>
+      <div class="modal-planet" id="modalPlanet"></div>
+      <div class="modal-content">
+        <p class="modal-type" id="modalType"></p>
+        <h2 id="modalTitle"></h2>
+        <p class="modal-text" id="modalText"></p>
+        <div class="facts" id="modalFacts"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Lost somewhere in space</p>
+
+  </footer>
+
+  <script src="planets.js"></script>
+</body>
+</html>

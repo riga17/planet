@@ -1,1642 +1,400 @@
-/* =========================================
-   GAME SELECTOR
-========================================= */
+const $ = id => document.getElementById(id);
+const all = sel => document.querySelectorAll(sel);
 
-const missionCards =
-  document.querySelectorAll(".mission-card");
-
-const gamePanels =
-  document.querySelectorAll(".game-panel");
-
-
-missionCards.forEach(card => {
-
-  card.addEventListener("click", () => {
-
-    const game =
-      card.dataset.game;
-
-    missionCards.forEach(item => {
-      item.classList.remove("active");
-    });
-
-    card.classList.add("active");
-
-    gamePanels.forEach(panel => {
-
-      panel.classList.remove("active-panel");
-
-      if (panel.id === game) {
-        panel.classList.add("active-panel");
-      }
-
-    });
-
-  });
-
+all(".mission-card").forEach(card => card.onclick = () => {
+  all(".mission-card").forEach(x => x.classList.remove("active"));
+  all(".game-panel").forEach(x => x.classList.remove("active-panel"));
+  card.classList.add("active");
+  $(card.dataset.game)?.classList.add("active-panel");
 });
 
 
+const canvas = $("rocketCanvas"), ctx = canvas.getContext("2d");
+const startBtn = $("rocketStart"), resetBtn = $("rocketReset");
+const msg = $("rocketMessage"), scoreEl = $("rocketScore");
+const sideScore = $("sideScore"), planetsEl = $("planetCount");
+const distanceEl = $("rocketDistance"), statusEl = $("rocketStatus");
 
-/* =========================================
-   PLANET RUN
-========================================= */
+const W = 720, H = 600, GRID = 30;
+const COLS = W / GRID, ROWS = H / GRID;
+const planetTypes = ["earth","mars","jupiter","saturn","neptune"];
 
-const canvas =
-  document.getElementById("rocketCanvas");
+let running = false, animation, score = 0, collected = 0, distance = 0;
+let dir = {x:1,y:0}, nextDir = {x:1,y:0};
+let rocket = [], planet = {}, debris = [], stars = [];
 
-const ctx =
-  canvas.getContext("2d");
-
-
-const startButton =
-  document.getElementById("rocketStart");
-
-const resetButton =
-  document.getElementById("rocketReset");
-
-const message =
-  document.getElementById("rocketMessage");
-
-const scoreElement =
-  document.getElementById("rocketScore");
-
-const sideScore =
-  document.getElementById("sideScore");
-
-const planetCountElement =
-  document.getElementById("planetCount");
-
-const distanceElement =
-  document.getElementById("rocketDistance");
-
-const statusElement =
-  document.getElementById("rocketStatus");
-
-
-const WIDTH = 720;
-const HEIGHT = 600;
-
-const GRID = 30;
-
-const COLUMNS =
-  WIDTH / GRID;
-
-const ROWS =
-  HEIGHT / GRID;
-
-
-let gameRunning = false;
-
-let gameLoop;
-
-let score = 0;
-
-let collected = 0;
-
-let distance = 0;
-
-let direction = {
-  x: 1,
-  y: 0
-};
-
-let nextDirection = {
-  x: 1,
-  y: 0
-};
-
-
-let rocket = [];
-
-
-let planet = {
-  x: 15,
-  y: 10,
-  type: "earth"
-};
-
-
-let debris = [];
-
-
-let backgroundStars = [];
-
-
-
-/* =========================================
-   STAR FIELD
-========================================= */
-
-function createStars() {
-
-  backgroundStars = [];
-
-  for (let i = 0; i < 130; i++) {
-
-    backgroundStars.push({
-
-      x:
-        Math.random() * WIDTH,
-
-      y:
-        Math.random() * HEIGHT,
-
-      size:
-        Math.random() * 1.5 + .2,
-
-      opacity:
-        Math.random() * .7 + .2
-
-    });
-
-  }
-
+function starsCreate() {
+  stars = Array.from({length:130}, () => ({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    size:Math.random()*1.5+.2,
+    opacity:Math.random()*.7+.2
+  }));
 }
 
-
-
-/* =========================================
-   SPACE DEBRIS
-========================================= */
-
-function createDebris() {
-
-  debris = [];
-
-  for (let i = 0; i < 7; i++) {
-
-    debris.push({
-
-      x:
-        Math.floor(
-          Math.random() * COLUMNS
-        ),
-
-      y:
-        Math.floor(
-          Math.random() * ROWS
-        ),
-
-      size:
-        Math.random() * 5 + 5,
-
-      rotation:
-        Math.random() * Math.PI
-
-    });
-
-  }
-
+function debrisCreate() {
+  debris = Array.from({length:7}, () => ({
+    x:Math.floor(Math.random()*COLS),
+    y:Math.floor(Math.random()*ROWS),
+    size:Math.random()*5+5,
+    rotation:Math.random()*Math.PI
+  }));
 }
 
-
-
-/* =========================================
-   PLANET TYPES
-========================================= */
-
-const planetTypes = [
-
-  "earth",
-
-  "mars",
-
-  "jupiter",
-
-  "saturn",
-
-  "neptune"
-
-];
-
-
-
-function createPlanet() {
-
-  let position;
-
+function planetCreate() {
+  let p;
   do {
-
-    position = {
-
-      x:
-        Math.floor(
-          Math.random() * (COLUMNS - 2)
-        ) + 1,
-
-      y:
-        Math.floor(
-          Math.random() * (ROWS - 2)
-        ) + 1
-
+    p = {
+      x:Math.floor(Math.random()*(COLS-2))+1,
+      y:Math.floor(Math.random()*(ROWS-2))+1
     };
+  } while (rocket.some(r => r.x === p.x && r.y === p.y));
 
-  } while (
-    rocket.some(
-      part =>
-        part.x === position.x &&
-        part.y === position.y
-    )
-  );
-
-
-  planet = {
-
-    ...position,
-
-    type:
-      planetTypes[
-        Math.floor(
-          Math.random() *
-          planetTypes.length
-        )
-      ]
-
-  };
-
+  planet = {...p,type:planetTypes[Math.floor(Math.random()*planetTypes.length)]};
 }
-
-
-
-/* =========================================
-   RESET
-========================================= */
 
 function resetRocketGame() {
+  running = false;
+  cancelAnimationFrame(animation);
+  score = collected = distance = 0;
+  dir = nextDir = {x:1,y:0};
 
-  gameRunning = false;
+  rocket = [{x:8,y:10},{x:7,y:10},{x:6,y:10}];
 
-  cancelAnimationFrame(gameLoop);
+  starsCreate();
+  debrisCreate();
+  planetCreate();
 
-
-  score = 0;
-
-  collected = 0;
-
-  distance = 0;
-
-
-  direction = {
-    x: 1,
-    y: 0
-  };
-
-
-  nextDirection = {
-    x: 1,
-    y: 0
-  };
-
-
-  rocket = [
-
-    {
-      x: 8,
-      y: 10
-    },
-
-    {
-      x: 7,
-      y: 10
-    },
-
-    {
-      x: 6,
-      y: 10
-    }
-
-  ];
-
-
-  createStars();
-
-  createDebris();
-
-  createPlanet();
-
-
-  message.classList.remove("hidden");
-
-  message.querySelector("h3").textContent =
-    "PLANET RUN";
-
-  message.querySelector("p").textContent =
+  msg.classList.remove("hidden");
+  msg.querySelector("h3").textContent = "PLANET RUN";
+  msg.querySelector("p").textContent =
     "Use the arrow keys or WASD. Collect planets and avoid space debris.";
-
-  startButton.textContent =
-    "Launch Mission";
-
-
-  statusElement.textContent =
-    "STANDBY";
-
+  startBtn.textContent = "Launch Mission";
+  statusEl.textContent = "STANDBY";
 
   updateUI();
-
   draw();
-
 }
-
-
-
-/* =========================================
-   START
-========================================= */
 
 function startRocketGame() {
-
   resetRocketGame();
-
-  message.classList.add("hidden");
-
-  gameRunning = true;
-
-  statusElement.textContent =
-    "ACTIVE";
-
-
-  gameLoop =
-    requestAnimationFrame(
-      loop
-    );
-
+  msg.classList.add("hidden");
+  running = true;
+  statusEl.textContent = "ACTIVE";
+  animation = requestAnimationFrame(loop);
 }
-
-
-
-/* =========================================
-   UI
-========================================= */
 
 function updateUI() {
-
-  scoreElement.textContent =
-    score;
-
-  sideScore.textContent =
-    score;
-
-  planetCountElement.textContent =
-    collected;
-
-  distanceElement.textContent =
-    Math.floor(distance) +
-    " km";
-
+  scoreEl.textContent = sideScore.textContent = score;
+  planetsEl.textContent = collected;
+  distanceEl.textContent = Math.floor(distance) + " km";
 }
 
+function background() {
+  const g = ctx.createRadialGradient(W/2,H/2,20,W/2,H/2,W);
+  g.addColorStop(0,"#0c1624");
+  g.addColorStop(.55,"#040912");
+  g.addColorStop(1,"#010205");
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
 
-
-/* =========================================
-   DRAW BACKGROUND
-========================================= */
-
-function drawBackground() {
-
-  const gradient =
-    ctx.createRadialGradient(
-      WIDTH / 2,
-      HEIGHT / 2,
-      20,
-      WIDTH / 2,
-      HEIGHT / 2,
-      WIDTH
-    );
-
-
-  gradient.addColorStop(
-    0,
-    "#0c1624"
-  );
-
-
-  gradient.addColorStop(
-    .55,
-    "#040912"
-  );
-
-
-  gradient.addColorStop(
-    1,
-    "#010205"
-  );
-
-
-  ctx.fillStyle =
-    gradient;
-
-  ctx.fillRect(
-    0,
-    0,
-    WIDTH,
-    HEIGHT
-  );
-
-
-  backgroundStars.forEach(star => {
-
-    ctx.globalAlpha =
-      star.opacity;
-
-    ctx.fillStyle =
-      "#dce6f5";
-
+  stars.forEach(s => {
+    ctx.globalAlpha = s.opacity;
+    ctx.fillStyle = "#dce6f5";
     ctx.beginPath();
-
-    ctx.arc(
-      star.x,
-      star.y,
-      star.size,
-      0,
-      Math.PI * 2
-    );
-
+    ctx.arc(s.x,s.y,s.size,0,Math.PI*2);
     ctx.fill();
-
   });
-
-
-  ctx.globalAlpha = 1;
-
-
-
-  /* distant planet */
 
   ctx.globalAlpha = .12;
-
-  ctx.fillStyle =
-    "#627aa1";
-
+  ctx.fillStyle = "#627aa1";
   ctx.beginPath();
-
-  ctx.arc(
-    650,
-    80,
-    90,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(650,80,90,0,Math.PI*2);
   ctx.fill();
-
   ctx.globalAlpha = 1;
-
 }
-
-
-
-/* =========================================
-   DRAW PLANET
-========================================= */
 
 function drawPlanet() {
-
-  const x =
-    planet.x * GRID +
-    GRID / 2;
-
-  const y =
-    planet.y * GRID +
-    GRID / 2;
-
+  const x = planet.x*GRID+GRID/2, y = planet.y*GRID+GRID/2;
+  const colors = {
+    earth:"#3e8ed0", mars:"#a64f3d", jupiter:"#bd9565",
+    saturn:"#c9ad72", neptune:"#4268a8"
+  };
+  const c = colors[planet.type];
 
   ctx.save();
-
-  ctx.translate(x, y);
-
-
-  let color =
-    "#3e8ed0";
-
-
-  if (planet.type === "mars") {
-    color = "#a64f3d";
-  }
-
-  if (planet.type === "jupiter") {
-    color = "#bd9565";
-  }
-
-  if (planet.type === "saturn") {
-    color = "#c9ad72";
-  }
-
-  if (planet.type === "neptune") {
-    color = "#4268a8";
-  }
-
-
-  /* glow */
-
+  ctx.translate(x,y);
   ctx.shadowBlur = 20;
-
-  ctx.shadowColor =
-    color;
-
-
-  ctx.fillStyle =
-    color;
-
-
+  ctx.shadowColor = c;
+  ctx.fillStyle = c;
   ctx.beginPath();
-
-  ctx.arc(
-    0,
-    0,
-    11,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(0,0,11,0,Math.PI*2);
   ctx.fill();
-
-
   ctx.shadowBlur = 0;
 
-
-  /* Earth */
-
   if (planet.type === "earth") {
-
-    ctx.fillStyle =
-      "#58a86b";
-
+    ctx.fillStyle="#58a86b";
     ctx.beginPath();
-
-    ctx.arc(
-      -3,
-      -2,
-      4,
-      0,
-      Math.PI * 2
-    );
-
+    ctx.arc(-3,-2,4,0,Math.PI*2);
     ctx.fill();
-
   }
-
-
-  /* Saturn rings */
 
   if (planet.type === "saturn") {
-
-    ctx.strokeStyle =
-      "#d8c58e";
-
-    ctx.lineWidth = 3;
-
+    ctx.strokeStyle="#d8c58e";
+    ctx.lineWidth=3;
     ctx.beginPath();
-
-    ctx.ellipse(
-      0,
-      0,
-      18,
-      6,
-      -.25,
-      0,
-      Math.PI * 2
-    );
-
+    ctx.ellipse(0,0,18,6,-.25,0,Math.PI*2);
     ctx.stroke();
-
   }
 
-
   ctx.restore();
-
 }
-
-
-
-/* =========================================
-   DRAW DEBRIS
-========================================= */
 
 function drawDebris() {
-
-  debris.forEach(rock => {
-
-    const x =
-      rock.x * GRID +
-      GRID / 2;
-
-    const y =
-      rock.y * GRID +
-      GRID / 2;
-
-
+  debris.forEach(r => {
     ctx.save();
-
-    ctx.translate(x, y);
-
-    ctx.rotate(
-      rock.rotation
-    );
-
-
-    ctx.fillStyle =
-      "#555c66";
-
-
+    ctx.translate(r.x*GRID+GRID/2,r.y*GRID+GRID/2);
+    ctx.rotate(r.rotation);
+    ctx.fillStyle="#555c66";
     ctx.beginPath();
-
-    ctx.moveTo(
-      -7,
-      -5
-    );
-
-    ctx.lineTo(
-      5,
-      -7
-    );
-
-    ctx.lineTo(
-      8,
-      3
-    );
-
-    ctx.lineTo(
-      2,
-      8
-    );
-
-    ctx.lineTo(
-      -7,
-      5
-    );
-
+    ctx.moveTo(-7,-5);
+    ctx.lineTo(5,-7);
+    ctx.lineTo(8,3);
+    ctx.lineTo(2,8);
+    ctx.lineTo(-7,5);
     ctx.closePath();
-
     ctx.fill();
-
-
     ctx.restore();
-
   });
-
 }
-
-
-
-/* =========================================
-   DRAW ROCKET
-========================================= */
 
 function drawRocket() {
+  rocket.forEach((p,i) => {
+    const x=p.x*GRID+GRID/2, y=p.y*GRID+GRID/2;
 
-  rocket.forEach(
-    (part, index) => {
+    if (!i) return drawHead(x,y);
 
-      const x =
-        part.x * GRID +
-        GRID / 2;
-
-      const y =
-        part.y * GRID +
-        GRID / 2;
-
-
-      if (index === 0) {
-
-        drawRocketHead(
-          x,
-          y
-        );
-
-      } else {
-
-        ctx.fillStyle =
-          index % 2 === 0
-            ? "#c5cbd2"
-            : "#929aa3";
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-          x,
-          y,
-          9,
-          0,
-          Math.PI * 2
-        );
-
-        ctx.fill();
-
-      }
-
-    }
-  );
-
+    ctx.fillStyle=i%2?"#929aa3":"#c5cbd2";
+    ctx.beginPath();
+    ctx.arc(x,y,9,0,Math.PI*2);
+    ctx.fill();
+  });
 }
 
-
-
-/* =========================================
-   ROCKET HEAD
-========================================= */
-
-function drawRocketHead(
-  x,
-  y
-) {
+function drawHead(x,y) {
+  let angle = dir.x===1 ? 0 : dir.x===-1 ? Math.PI :
+              dir.y===1 ? Math.PI/2 : -Math.PI/2;
 
   ctx.save();
-
-  ctx.translate(
-    x,
-    y
-  );
-
-
-  let angle = 0;
-
-
-  if (direction.x === 1)
-    angle = 0;
-
-  if (direction.x === -1)
-    angle = Math.PI;
-
-  if (direction.y === 1)
-    angle = Math.PI / 2;
-
-  if (direction.y === -1)
-    angle = -Math.PI / 2;
-
-
+  ctx.translate(x,y);
   ctx.rotate(angle);
 
-
-  /* engine flame */
-
-  ctx.fillStyle =
-    "#d59b3d";
-
-
+  ctx.fillStyle="#d59b3d";
   ctx.beginPath();
-
-  ctx.moveTo(
-    -13,
-    0
-  );
-
-  ctx.lineTo(
-    -25,
-    -5
-  );
-
-  ctx.lineTo(
-    -20,
-    0
-  );
-
-  ctx.lineTo(
-    -25,
-    5
-  );
-
+  ctx.moveTo(-13,0);
+  ctx.lineTo(-25,-5);
+  ctx.lineTo(-20,0);
+  ctx.lineTo(-25,5);
   ctx.closePath();
-
   ctx.fill();
 
-
-  /* rocket */
-
-  ctx.fillStyle =
-    "#e1e4e8";
-
-
+  ctx.fillStyle="#e1e4e8";
   ctx.beginPath();
-
-  ctx.moveTo(
-    14,
-    0
-  );
-
-  ctx.lineTo(
-    -8,
-    -9
-  );
-
-  ctx.lineTo(
-    -6,
-    9
-  );
-
+  ctx.moveTo(14,0);
+  ctx.lineTo(-8,-9);
+  ctx.lineTo(-6,9);
   ctx.closePath();
-
   ctx.fill();
 
-
-  /* window */
-
-  ctx.fillStyle =
-    "#47799a";
-
-
+  ctx.fillStyle="#47799a";
   ctx.beginPath();
-
-  ctx.arc(
-    3,
-    0,
-    4,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(3,0,4,0,Math.PI*2);
   ctx.fill();
-
 
   ctx.restore();
-
 }
-
-
-
-/* =========================================
-   DRAW
-========================================= */
 
 function draw() {
-
-  drawBackground();
-
+  background();
   drawDebris();
-
   drawPlanet();
-
   drawRocket();
-
 }
 
+function collision() {
+  const h = rocket[0];
 
+  if (h.x<0 || h.x>=COLS || h.y<0 || h.y>=ROWS) return true;
 
-/* =========================================
-   COLLISION
-========================================= */
-
-function checkCollision() {
-
-  const head =
-    rocket[0];
-
-
-  /* walls */
-
-  if (
-
-    head.x < 0 ||
-
-    head.x >= COLUMNS ||
-
-    head.y < 0 ||
-
-    head.y >= ROWS
-
-  ) {
-
-    return true;
-
-  }
-
-
-  /* own trail */
-
-  for (
-    let i = 1;
-    i < rocket.length;
-    i++
-  ) {
-
-    if (
-
-      head.x === rocket[i].x &&
-
-      head.y === rocket[i].y
-
-    ) {
-
-      return true;
-
-    }
-
-  }
-
-
-  /* debris */
-
-  for (
-    const rock of debris
-  ) {
-
-    if (
-
-      head.x === rock.x &&
-
-      head.y === rock.y
-
-    ) {
-
-      return true;
-
-    }
-
-  }
-
-
-  return false;
-
+  if (rocket.slice(1).some(p => p.x===h.x && p.y===h.y)) return true;
+  return debris.some(r => r.x===h.x && r.y===h.y);
 }
-
-
-
-/* =========================================
-   UPDATE
-========================================= */
 
 function update() {
-
-  direction =
-    nextDirection;
-
+  dir = nextDir;
 
   const head = {
-
-    x:
-      rocket[0].x +
-      direction.x,
-
-    y:
-      rocket[0].y +
-      direction.y
-
+    x:rocket[0].x+dir.x,
+    y:rocket[0].y+dir.y
   };
-
 
   rocket.unshift(head);
 
-
-  /* planet collected */
-
-  if (
-
-    head.x === planet.x &&
-
-    head.y === planet.y
-
-  ) {
-
-    score += 100;
-
+  if (head.x===planet.x && head.y===planet.y) {
+    score+=100;
     collected++;
+    distance+=250;
+    planetCreate();
 
-    distance += 250;
-
-
-    createPlanet();
-
-
-    /* add new debris */
-
-    if (
-      collected % 3 === 0
-    ) {
-
+    if (collected%3===0)
       debris.push({
-
-        x:
-          Math.floor(
-            Math.random() *
-            COLUMNS
-          ),
-
-        y:
-          Math.floor(
-            Math.random() *
-            ROWS
-          ),
-
-        size:
-          Math.random() * 5 + 5,
-
-        rotation:
-          Math.random() * Math.PI
-
+        x:Math.floor(Math.random()*COLS),
+        y:Math.floor(Math.random()*ROWS),
+        size:Math.random()*5+5,
+        rotation:Math.random()*Math.PI
       });
+  } else rocket.pop();
 
-    }
-
-  } else {
-
-    rocket.pop();
-
-  }
-
-
-  distance += 5;
-
-
+  distance+=5;
   updateUI();
 
-
-  if (
-    checkCollision()
-  ) {
-
-    endGame();
-
-  }
-
+  if (collision()) endGame();
 }
 
-
-
-/* =========================================
-   GAME LOOP
-========================================= */
-
-let lastMove = 0;
-
-const gameSpeed = 115;
-
+let lastMove=0;
 
 function loop(time) {
+  if (!running) return;
 
-  if (!gameRunning)
-    return;
-
-
-  if (
-    time - lastMove >
-    gameSpeed
-  ) {
-
+  if (time-lastMove>115) {
     update();
-
     draw();
-
-    lastMove = time;
-
+    lastMove=time;
   }
 
-
-  gameLoop =
-    requestAnimationFrame(
-      loop
-    );
-
+  animation=requestAnimationFrame(loop);
 }
-
-
-
-/* =========================================
-   GAME OVER
-========================================= */
 
 function endGame() {
-
-  gameRunning = false;
-
-
-  statusElement.textContent =
-    "MISSION FAILED";
-
-
-  message.classList.remove(
-    "hidden"
-  );
-
-
-  message.querySelector("h3")
-    .textContent =
-    "MISSION COMPLETE";
-
-
-  message.querySelector("p")
-    .textContent =
+  running=false;
+  statusEl.textContent="MISSION FAILED";
+  msg.classList.remove("hidden");
+  msg.querySelector("h3").textContent="MISSION COMPLETE";
+  msg.querySelector("p").textContent =
     `You explored ${collected} planets and scored ${score} points.`;
-
-
-  startButton.textContent =
-    "Fly Again";
-
+  startBtn.textContent="Fly Again";
 }
 
-
-
-/* =========================================
-   CONTROLS
-========================================= */
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    const key =
-      event.key.toLowerCase();
-
-
-    if (
-      (
-        key === "arrowup" ||
-        key === "w"
-      ) &&
-      direction.y !== 1
-    ) {
-
-      nextDirection = {
-        x: 0,
-        y: -1
-      };
-
-    }
-
-
-    if (
-      (
-        key === "arrowdown" ||
-        key === "s"
-      ) &&
-      direction.y !== -1
-    ) {
-
-      nextDirection = {
-        x: 0,
-        y: 1
-      };
-
-    }
-
-
-    if (
-      (
-        key === "arrowleft" ||
-        key === "a"
-      ) &&
-      direction.x !== 1
-    ) {
-
-      nextDirection = {
-        x: -1,
-        y: 0
-      };
-
-    }
-
-
-    if (
-      (
-        key === "arrowright" ||
-        key === "d"
-      ) &&
-      direction.x !== -1
-    ) {
-
-      nextDirection = {
-        x: 1,
-        y: 0
-      };
-
-    }
-
-  }
-);
-
-
-startButton.addEventListener(
-  "click",
-  startRocketGame
-);
-
-
-resetButton.addEventListener(
-  "click",
-  resetRocketGame
-);
-
-
-
-/* =========================================
-   SOLAR SYSTEM QUIZ
-========================================= */
-
-const questions = [
-
-  {
-    question:
-      "Which planet is closest to the Sun?",
-
-    answers: [
-      "Venus",
-      "Mercury",
-      "Mars",
-      "Earth"
-    ],
-
-    correct: 1
-  },
-
-
-  {
-    question:
-      "Which planet is known for its large ring system?",
-
-    answers: [
-      "Jupiter",
-      "Uranus",
-      "Saturn",
-      "Neptune"
-    ],
-
-    correct: 2
-  },
-
-
-  {
-    question:
-      "Which planet is the largest in the Solar System?",
-
-    answers: [
-      "Earth",
-      "Saturn",
-      "Jupiter",
-      "Neptune"
-    ],
-
-    correct: 2
-  },
-
-
-  {
-    question:
-      "Which planet is known as the Red Planet?",
-
-    answers: [
-      "Mars",
-      "Venus",
-      "Mercury",
-      "Jupiter"
-    ],
-
-    correct: 0
-  },
-
-
-  {
-    question:
-      "Which planet is farthest from the Sun?",
-
-    answers: [
-      "Uranus",
-      "Saturn",
-      "Neptune",
-      "Mars"
-    ],
-
-    correct: 2
-  },
-
-
-  {
-    question:
-      "Which planet has liquid water covering much of its surface?",
-
-    answers: [
-      "Earth",
-      "Venus",
-      "Mars",
-      "Mercury"
-    ],
-
-    correct: 0
-  },
-
-
-  {
-    question:
-      "What is the Sun?",
-
-    answers: [
-      "A planet",
-      "A moon",
-      "A star",
-      "An asteroid"
-    ],
-
-    correct: 2
-  },
-
-
-  {
-    question:
-      "Which planet rotates almost on its side?",
-
-    answers: [
-      "Uranus",
-      "Neptune",
-      "Venus",
-      "Mars"
-    ],
-
-    correct: 0
-  },
-
-
-  {
-    question:
-      "Which planet has the Great Red Spot?",
-
-    answers: [
-      "Mars",
-      "Jupiter",
-      "Saturn",
-      "Venus"
-    ],
-
-    correct: 1
-  },
-
-
-  {
-    question:
-      "How many planets are officially recognized in our Solar System?",
-
-    answers: [
-      "7",
-      "8",
-      "9",
-      "10"
-    ],
-
-    correct: 1
-  }
-
+document.addEventListener("keydown", e => {
+  const k=e.key.toLowerCase();
+  const keys={
+    arrowup:{x:0,y:-1},w:{x:0,y:-1},
+    arrowdown:{x:0,y:1},s:{x:0,y:1},
+    arrowleft:{x:-1,y:0},a:{x:-1,y:0},
+    arrowright:{x:1,y:0},d:{x:1,y:0}
+  };
+
+  const d=keys[k];
+  if (!d) return;
+
+  if (d.x && d.x===-dir.x || d.y && d.y===-dir.y) return;
+  nextDir=d;
+});
+
+startBtn.onclick=startRocketGame;
+resetBtn.onclick=resetRocketGame;
+
+
+const questions=[
+  ["Which planet is closest to the Sun?",["Venus","Mercury","Mars","Earth"],1],
+  ["Which planet is known for its large ring system?",["Jupiter","Uranus","Saturn","Neptune"],2],
+  ["Which planet is the largest in the Solar System?",["Earth","Saturn","Jupiter","Neptune"],2],
+  ["Which planet is known as the Red Planet?",["Mars","Venus","Mercury","Jupiter"],0],
+  ["Which planet is farthest from the Sun?",["Uranus","Saturn","Neptune","Mars"],2],
+  ["Which planet has liquid water covering much of its surface?",["Earth","Venus","Mars","Mercury"],0],
+  ["What is the Sun?",["A planet","A moon","A star","An asteroid"],2],
+  ["Which planet rotates almost on its side?",["Uranus","Neptune","Venus","Mars"],0],
+  ["Which planet has the Great Red Spot?",["Mars","Jupiter","Saturn","Venus"],1],
+  ["How many planets are officially recognized in our Solar System?",["7","8","9","10"],1]
 ];
 
+let qIndex=0, quizScore=0, answered=false;
 
-let currentQuestion = 0;
-
-let quizScore = 0;
-
-let questionAnswered = false;
-
-
-const questionElement =
-  document.getElementById(
-    "question"
-  );
-
-
-const answersElement =
-  document.getElementById(
-    "answers"
-  );
-
-
-const questionCount =
-  document.getElementById(
-    "questionCount"
-  );
-
-
-const quizScoreElement =
-  document.getElementById(
-    "quizScore"
-  );
-
-
-const quizFeedback =
-  document.getElementById(
-    "quizFeedback"
-  );
-
-
-const nextQuestion =
-  document.getElementById(
-    "nextQuestion"
-  );
-
+const question=$("question");
+const answers=$("answers");
+const qCount=$("questionCount");
+const qScore=$("quizScore");
+const feedback=$("quizFeedback");
+const next=$("nextQuestion");
 
 function loadQuestion() {
+  const q=questions[qIndex];
+  answered=false;
 
-  const q =
-    questions[currentQuestion];
+  qCount.textContent=`QUESTION ${qIndex+1} / ${questions.length}`;
+  question.textContent=q[0];
+  answers.innerHTML="";
 
+  q[1].forEach((answer,i)=>{
+    const b=document.createElement("button");
+    b.className="answer";
+    b.textContent=answer;
+    b.onclick=()=>answerQuestion(i,b);
+    answers.appendChild(b);
+  });
 
-  questionAnswered = false;
-
-
-  questionCount.textContent =
-    `QUESTION ${currentQuestion + 1} / ${questions.length}`;
-
-
-  questionElement.textContent =
-    q.question;
-
-
-  answersElement.innerHTML = "";
-
-
-  q.answers.forEach(
-    (answer, index) => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.className =
-        "answer";
-
-
-      button.textContent =
-        answer;
-
-
-      button.addEventListener(
-        "click",
-        () =>
-          answerQuestion(
-            index,
-            button
-          )
-      );
-
-
-      answersElement.appendChild(
-        button
-      );
-
-    }
-  );
-
-
-  quizFeedback.textContent =
-    "Select an answer.";
-
-
-  nextQuestion.disabled =
-    true;
-
+  feedback.textContent="Select an answer.";
+  next.disabled=true;
+  next.textContent="Next Question";
 }
 
+function answerQuestion(selected,button) {
+  if(answered)return;
+  answered=true;
 
-function answerQuestion(
-  selected,
-  button
-) {
+  const q=questions[qIndex];
+  const buttons=answers.querySelectorAll(".answer");
 
-  if (questionAnswered)
-    return;
+  buttons.forEach(b=>b.disabled=true);
 
-
-  questionAnswered = true;
-
-
-  const q =
-    questions[currentQuestion];
-
-
-  const buttons =
-    answersElement.querySelectorAll(
-      ".answer"
-    );
-
-
-  buttons.forEach(
-    item => {
-      item.disabled = true;
-    }
-  );
-
-
-  if (
-    selected === q.correct
-  ) {
-
-    button.classList.add(
-      "correct"
-    );
-
-
-    quizScore += 100;
-
-
-    quizFeedback.textContent =
-      "Correct.";
-
-  } else {
-
-    button.classList.add(
-      "wrong"
-    );
-
-
-    buttons[
-      q.correct
-    ].classList.add(
-      "correct"
-    );
-
-
-    quizFeedback.textContent =
-      "Incorrect.";
-
+  if(selected===q[2]){
+    button.classList.add("correct");
+    quizScore+=100;
+    feedback.textContent="Correct.";
+  }else{
+    button.classList.add("wrong");
+    buttons[q[2]].classList.add("correct");
+    feedback.textContent="Incorrect.";
   }
 
-
-  quizScoreElement.textContent =
-    quizScore;
-
-
-  nextQuestion.disabled =
-    false;
-
+  qScore.textContent=quizScore;
+  next.disabled=false;
 }
 
-
-nextQuestion.addEventListener(
-  "click",
-  () => {
-
-    currentQuestion++;
-
-
-    if (
-      currentQuestion >=
-      questions.length
-    ) {
-
-      questionElement.textContent =
-        `Mission complete. Final score: ${quizScore} / ${questions.length * 100}.`;
-
-
-      answersElement.innerHTML =
-        "";
-
-
-      quizFeedback.textContent =
-        "You have completed the Solar System quiz.";
-
-
-      nextQuestion.textContent =
-        "Restart Quiz";
-
-
-      currentQuestion = 0;
-
-
-      nextQuestion.disabled =
-        false;
-
-
-      return;
-
-    }
-
-
+next.onclick=()=>{
+  if(next.textContent==="Restart Quiz"){
+    quizScore=0;
+    qScore.textContent=0;
+    qIndex=0;
     loadQuestion();
-
+    return;
   }
-);
 
+  qIndex++;
 
-nextQuestion.addEventListener(
-  "click",
-  () => {
-
-    if (
-      nextQuestion.textContent ===
-      "Restart Quiz"
-    ) {
-
-      quizScore = 0;
-
-
-      quizScoreElement.textContent =
-        "0";
-
-
-      nextQuestion.textContent =
-        "Next Question";
-
-
-      loadQuestion();
-
-    }
-
+  if(qIndex>=questions.length){
+    question.textContent=
+      `Mission complete. Final score: ${quizScore} / ${questions.length*100}.`;
+    answers.innerHTML="";
+    feedback.textContent="You have completed the Solar System quiz.";
+    next.textContent="Restart Quiz";
+    next.disabled=false;
+    return;
   }
-);
 
+  loadQuestion();
+};
 
-
-/* =========================================
-   INITIALIZE
-========================================= */
 
 resetRocketGame();
-
 loadQuestion();

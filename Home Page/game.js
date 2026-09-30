@@ -132,6 +132,28 @@ function drawPlanet() {
   ctx.fill();
   ctx.shadowBlur = 0;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (planet.type === "earth") {
     ctx.fillStyle="#58a86b";
     ctx.beginPath();
@@ -139,9 +161,12 @@ function drawPlanet() {
     ctx.fill();
   }
 
+/*Nëse është Toka, ctx.fillStyle zgjedh ngjyrën e gjelbër, ctx.beginPath() fillon vizatimin, ctx.arc() bën një rreth të vogël,
+ ndërsa ctx.fill() e mbush atë rreth me ngjyrë të gjelbër.*/
+
   if (planet.type === "saturn") {
     ctx.strokeStyle="#d8c58e";
-    ctx.lineWidth=3;
+    ctx.lineWidth=3; /* trgeon trashesine e unazes*/
     ctx.beginPath();
     ctx.ellipse(0,0,18,6,-.25,0,Math.PI*2);
     ctx.stroke();
@@ -168,6 +193,17 @@ function drawDebris() {
   });
 }
 
+/*Ky funksion përdoret për të vizatuar mbeturinat/asteroidët në lojë. function drawDebris() krijon funksionin,
+ ndërsa debris.forEach(r => { kalon nëpër çdo mbeturinë që ndodhet në lojë. ctx.save() ruan gjendjen e vizatimit, ctx.translate(...)
+  e vendos mbeturinën në pozicionin e saj, dhe ctx.rotate(r.rotation) e rrotullon atë. ctx.fillStyle vendos ngjyrën gri,
+   pastaj beginPath(), moveTo() dhe lineTo() krijojnë një formë të çrregullt si asteroid. closePath() e mbyll formën dhe fill() 
+   e mbush me ngjyrë.
+ Në fund, ctx.restore() rikthen gjendjen e Canvas-it.*/
+
+
+
+
+
 function drawRocket() {
   rocket.forEach((p,i) => {
     const x=p.x*GRID+GRID/2, y=p.y*GRID+GRID/2;
@@ -181,9 +217,24 @@ function drawRocket() {
   });
 }
 
+/*, kodi e ndërton raketën duke vizatuar fillimisht kokën dhe pastaj pjesët e trupit njëra pas tjetrës.*/
+
+
+
+
+
 function drawHead(x,y) {
   let angle = dir.x===1 ? 0 : dir.x===-1 ? Math.PI :
               dir.y===1 ? Math.PI/2 : -Math.PI/2;
+
+
+/*ky kod e rrotullon kokën e raketës në drejtimin ku po lëviz raketa.
+-Math.PI/2 → nëse po shkon lart, përdoret ky kënd.
+nëse po shkon poshtë, këndi është Math.PI/2*/
+
+
+
+
 
   ctx.save();
   ctx.translate(x,y);
@@ -221,6 +272,11 @@ function draw() {
   drawRocket();
 }
 
+
+
+
+
+
 function collision() {
   const h = rocket[0];
 
@@ -229,6 +285,11 @@ function collision() {
   if (rocket.slice(1).some(p => p.x===h.x && p.y===h.y)) return true;
   return debris.some(r => r.x===h.x && r.y===h.y);
 }
+
+
+
+
+
 
 function update() {
   dir = nextDir;
@@ -239,6 +300,44 @@ function update() {
   };
 
   rocket.unshift(head);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   if (head.x===planet.x && head.y===planet.y) {
     score+=100;
